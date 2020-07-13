@@ -1,27 +1,74 @@
 package com.zmt.exercise.leetcode;
 
-import java.util.LinkedHashMap;
+import java.util.HashMap;
 import java.util.Map;
 
-public class LRUCache extends LinkedHashMap<Integer, Integer> {
+class LRUCache {
+    class Node {
+        int key;
+        int val;
+        Node next;
+        Node before;
+
+        public Node() {
+        }
+
+        public Node(int key, int val) {
+            this.key = key;
+            this.val = val;
+        }
+    }
+
+    private Node begin;
+    private Node end;
+    private Map<Integer, Node> map;
     private int capacity;
 
     public LRUCache(int capacity) {
-        super(capacity, 0.75F, true);
+        map = new HashMap<>(capacity);
         this.capacity = capacity;
+        begin = new Node(-1, -1);
+        end = new Node(-1, -1);
+        begin.next = end;
+        begin.before = end;
+        end.next = begin;
+        end.before = begin;
     }
 
     public int get(int key) {
-        return super.getOrDefault(key, -1);
+        Node temp;
+        if (map.size() == 0 || (temp = map.get(key)) == null) return -1;
+        put(key,temp.val);
+        return temp.val;
     }
 
     public void put(int key, int value) {
-        super.put(key, value);
+        Node node = new Node(key, value);
+        if (!map.containsKey(key)) {
+            if (map.size() >= capacity) {
+                removeBegin();
+            }
+
+        } else {
+            node = map.get(key);
+            node.val = value;
+            node.next.before = node.before;
+            node.before.next = node.next;
+
+        }
+        putToEnd(node);
+        map.put(key, node);
     }
 
-    @Override
-    protected boolean removeEldestEntry(Map.Entry<Integer, Integer> eldest) {
-        return size() > capacity;
+    public void putToEnd(Node node){
+        end.before.next = node;
+        node.next = end;
+        node.before = end.before;
+        end.before = node;
     }
-
+    public void removeBegin(){
+        map.remove(begin.next.key);
+        begin.next.next.before = begin;
+        begin.next = begin.next.next;
+    }
 }
