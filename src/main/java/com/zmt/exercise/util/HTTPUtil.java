@@ -5,9 +5,11 @@ import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.ContentType;
+import org.apache.http.entity.mime.HttpMultipartMode;
 import org.apache.http.entity.mime.MultipartEntityBuilder;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
+import org.apache.http.protocol.HTTP;
 import org.apache.http.util.EntityUtils;
 
 import java.io.File;
@@ -18,7 +20,9 @@ import java.util.List;
 
 public class HTTPUtil {
     public static void main(String[] args) throws ClientProtocolException, IOException {
-        readExcel("");
+        String filePath = "C:\\Users\\zmt\\Desktop\\葡育实习\\资源\\书本.png";
+        ContentType type = getContentType(filePath.substring(filePath.lastIndexOf('.')));
+        upload(filePath,"书本,logo",type);
     }
 
     public static void readExcel(String filePath) {
@@ -51,9 +55,9 @@ public class HTTPUtil {
         String sURL = "http://129.204.209.166:8102/resource/v2/upload";
         CloseableHttpClient httpClient = HttpClients.createDefault();
         HttpPost uploadFile = new HttpPost(sURL);
-        MultipartEntityBuilder builder = MultipartEntityBuilder.create();
+        MultipartEntityBuilder builder = MultipartEntityBuilder.create().setMode(HttpMultipartMode.RFC6532);
         builder.addTextBody("userName", "zhumengting", ContentType.TEXT_PLAIN);
-        builder.addTextBody("feature", feature, ContentType.TEXT_PLAIN);
+        builder.addTextBody("feature", feature, ContentType.create(HTTP.PLAIN_TEXT_TYPE,HTTP.UTF_8));
 
         // 把文件加到HTTP的post请求中
         File f = new File(filePath);
